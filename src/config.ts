@@ -15,7 +15,7 @@ const SITE_LANG = "zh_CN"; // 语言代码，例如 'en', 'zh_CN', 'ja' 等
 
 // 网站基础配置
 export const siteConfig: SiteConfig = {
-	title: "QingmYiz's Blog", // 网站标题
+	title: "QingmYiz", // 网站标题
 	subtitle: "Just for love.", // 网站副标题
 
 	lang: SITE_LANG, // 网站语言
@@ -25,7 +25,7 @@ export const siteConfig: SiteConfig = {
 		fixed: false, // 是否隐藏主题色选择器
 	},
 	translate: {
-		enable: true, // 是否启用翻译功能
+		enable: false, // 是否启用翻译功能
 		service: "client.edge", // 使用 Edge 浏览器翻译服务
 		defaultLanguage: getTranslateLanguageFromConfig(SITE_LANG), // 根据网站语言自动设置默认翻译语言
 		showSelectTag: false, // 不显示默认语言选择下拉框，使用自定义按钮
@@ -101,7 +101,7 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Diary, // 日记
 		{
 			name: "GitHub", // 链接名称
-			url: "https://github.com/matsuzaka-yuki", // 外部链接无需添加基础路径
+			url: "https://github.com/QingmYiz", // 外部链接无需添加基础路径
 			external: true, // 显示外链图标并新标签页打开
 		},
 	],
@@ -111,17 +111,12 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
 	avatar: "assets/images/avatar.jpg", // 头像路径，相对 /src 目录，若以 '/' 开头则相对 /public 目录
 	name: "QingmYiz", // 昵称
-	bio: "Just for love", // 简介
+	bio: "To share something just for love.", // 简介
 	links: [
 		{
 			name: "Bilibli", // 链接名称
 			icon: "fa6-brands:bilibili", // 图标
-			url: "https://www.bilibili.com/", // 链接地址
-		},
-		{
-			name: "Gitee",
-			icon: "mdi:git",
-			url: "https://gitee.com/matsuzakayuki",
+			url: "https://www.bilibili.com/6335585", // 链接地址
 		},
 		{
 			name: "GitHub",
