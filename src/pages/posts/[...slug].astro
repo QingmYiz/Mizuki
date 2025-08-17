@@ -1,57 +1,78 @@
 ---
+// 导入 Node.js 内置 path 模块（用于路径拼接）
 import path from "node:path";
+// 导入评论组件
 import Comment from "@components/comment/index.astro";
+// 导入许可证组件
 import License from "@components/misc/License.astro";
+// 导入 Markdown 渲染组件
 import Markdown from "@components/misc/Markdown.astro";
+// 导入国际化 key
 import I18nKey from "@i18n/i18nKey";
+// 导入国际化方法
 import { i18n } from "@i18n/translation";
+// 导入主布局组件
 import MainGridLayout from "@layouts/MainGridLayout.astro";
+// 获取排序后的文章列表工具函数
 import { getSortedPosts } from "@utils/content-utils";
+// 获取目录和文章链接工具函数
 import { getDir, getPostUrlBySlug } from "@utils/url-utils";
+// 图标组件
 import { Icon } from "astro-icon/components";
+// 许可证配置
 import { licenseConfig } from "src/config";
+// 图片包装组件
 import ImageWrapper from "../../components/misc/ImageWrapper.astro";
+// 文章元数据组件
 import PostMetadata from "../../components/PostMeta.astro";
+// 个人和站点配置
 import { profileConfig, siteConfig } from "../../config";
+// 日期格式化工具
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
+
+// 生成静态路径（用于 SSG）
 export async function getStaticPaths() {
-	const blogEntries = await getSortedPosts();
-	return blogEntries.map((entry) => ({
-		params: { slug: entry.slug },
-		props: { entry },
-	}));
+    const blogEntries = await getSortedPosts();
+    return blogEntries.map((entry) => ({
+        params: { slug: entry.slug },
+        props: { entry },
+    }));
 }
 
+// 获取当前文章数据
 const { entry } = Astro.props;
+// 获取文章内容和标题
 const { Content, headings } = await entry.render();
-
+// 获取文章 frontmatter 信息（如字数、阅读时间等）
 const { remarkPluginFrontmatter } = await entry.render();
 
+// 构建结构化数据（SEO 用）
 const jsonLd = {
-	"@context": "https://schema.org",
-	"@type": "BlogPosting",
-	headline: entry.data.title,
-	description: entry.data.description || entry.data.title,
-	keywords: entry.data.tags,
-	author: {
-		"@type": "Person",
-		name: profileConfig.name,
-		url: Astro.site,
-	},
-	datePublished: formatDateToYYYYMMDD(entry.data.published),
-	inLanguage: entry.data.lang
-		? entry.data.lang.replace("_", "-")
-		: siteConfig.lang.replace("_", "-"),
-	// TODO include cover image here
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: entry.data.title,
+    description: entry.data.description || entry.data.title,
+    keywords: entry.data.tags,
+    author: {
+        "@type": "Person",
+        name: profileConfig.name,
+        url: Astro.site,
+    },
+    datePublished: formatDateToYYYYMMDD(entry.data.published),
+    inLanguage: entry.data.lang
+        ? entry.data.lang.replace("_", "-")
+        : siteConfig.lang.replace("_", "-"),
+    // TODO: 这里可以补充封面图片
 };
 ---
 <MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
+    {/* SEO 结构化数据 */}
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
             {}
         ]}>
-            <!-- word count and reading time -->
+            {/* 字数和阅读时间统计 */}
             <div class="flex flex-row text-black/30 dark:text-white/30 gap-5 mb-3 transition onload-animation">
                 <div class="flex flex-row items-center">
                     <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
@@ -69,7 +90,7 @@ const jsonLd = {
                 </div>
             </div>
 
-            <!-- title -->
+            {/* 文章标题 */}
             <div class="relative onload-animation">
                 <div
                     data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title"
@@ -83,7 +104,7 @@ const jsonLd = {
                 </div>
             </div>
 
-            <!-- metadata -->
+            {/* 文章元数据（发布时间、标签等） */}
             <div class="onload-animation">
                 <PostMetadata
                         class="mb-5"
@@ -92,28 +113,30 @@ const jsonLd = {
                         tags={entry.data.tags}
                         category={entry.data.category}
                 ></PostMetadata>
+                {/* 如果没有封面图则显示分割线 */}
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
 
-            <!-- always show cover as long as it has one -->
-
+            {/* 有封面图则显示封面 */}
             {entry.data.image &&
                 <ImageWrapper id="post-cover" src={entry.data.image} basePath={path.join("content/posts/", getDir(entry.id))} class="mb-8 rounded-xl banner-container onload-animation"/>
             }
 
-
+            {/* 文章内容 Markdown 渲染 */}
             <Markdown class="mb-6 markdown-content onload-animation">
                 <Content />
             </Markdown>
 
+            {/* 版权声明组件 */}
             {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
 
         </div>
     </div>
 
-    <!-- 评论 -->
+    {/* 评论组件 */}
     <Comment post={entry}></Comment>
 
+    {/* 上一篇/下一篇导航 */}
     <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full">
         <a href={entry.data.nextSlug ? getPostUrlBySlug(entry.data.nextSlug) : "#"}
            class:list={["w-full font-bold overflow-hidden active:scale-95", {"pointer-events-none": !entry.data.nextSlug}]}>
