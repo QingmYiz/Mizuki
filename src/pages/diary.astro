@@ -1,241 +1,275 @@
 ---
+// 导入国际化键名和翻译函数
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
+// 导入主布局组件
 import MainGridLayout from "../layouts/MainGridLayout.astro";
+// 导入图片包装组件
 import ImageWrapper from "../components/misc/ImageWrapper.astro";
 
-// 示例即刻短文数据
+// 示例即刻短文数据，实际项目可替换为后端接口数据
 const moments = [
+    {
+        id: 1,
+        content: "Share some nice/beautiful/gorgeous wallpapers。", // 短文内容
+        date: "2025-01-15T10:30:00Z", // 发布时间（ISO格式）
+        images: ["assets/images/1.webp", "assets/images/banner.webp"], // 图片列表
+    }, 
 	{
-		id: 1,
-		content: "Share some nice/beautiful/gorgeous wallpapers。",
-		date: "2025-01-15T10:30:00Z",
-		images: ["assets/images/1.webp", "assets/images/banner.webp"],
-	},
+        id: 2,
+        content: "明天返校啦，终于结束放假了，迫不及待想开学", // 新增日记内容
+        date: "2025-08-28T09:00:00Z", // 新增日记的时间
+        images: [""], // 新增日记的图片
+    },
 ];
 
-// 时间格式化函数
+// 时间格式化函数，将时间转换为“几分钟前/几小时前/几天前”格式
 function formatTime(dateString: string): string {
-	const now = new Date();
-	const date = new Date(dateString);
-	const diffInMinutes = Math.floor(
-		(now.getTime() - date.getTime()) / (1000 * 60),
-	);
+    const now = new Date(); // 当前时间
+    const date = new Date(dateString); // 短文发布时间
+    const diffInMinutes = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60), // 计算时间差（分钟）
+    );
 
-	if (diffInMinutes < 60) {
-		return `${diffInMinutes}${i18n(I18nKey.diaryMinutesAgo)}`;
-	}
-	if (diffInMinutes < 1440) {
-		// 24小时
-		const hours = Math.floor(diffInMinutes / 60);
-		return `${hours}${i18n(I18nKey.diaryHoursAgo)}`;
-	}
-	const days = Math.floor(diffInMinutes / 1440);
-	return `${days}${i18n(I18nKey.diaryDaysAgo)}`;
+    if (diffInMinutes < 60) {
+        // 小于1小时，显示“xx分钟前”
+        return `${diffInMinutes}${i18n(I18nKey.diaryMinutesAgo)}`;
+    }
+    if (diffInMinutes < 1440) {
+        // 小于24小时，显示“xx小时前”
+        const hours = Math.floor(diffInMinutes / 60);
+        return `${hours}${i18n(I18nKey.diaryHoursAgo)}`;
+    }
+    // 超过一天，显示“xx天前”
+    const days = Math.floor(diffInMinutes / 1440);
+    return `${days}${i18n(I18nKey.diaryDaysAgo)}`;
 }
 ---
 
+// 主布局，页面标题和描述
 <MainGridLayout title={i18n(I18nKey.diary)} description="即刻短文">
-	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
-		<div class="card-base z-10 px-4 py-4 md:px-6 md:py-5 relative w-full">
-			<div class="relative max-w-4xl mx-auto">
-				<!-- 页面头部 -->
-				<div class="moments-header mb-6">
-					<div class="header-content">
-						<div class="header-info">
-							<h1 class="moments-title text-xl md:text-2xl font-bold text-90 mb-1">{i18n(I18nKey.diary)}</h1>
-							<p class="moments-subtitle text-sm md:text-base text-75">{i18n(I18nKey.diarySubtitle)}</p>
-						</div>
-						<div class="header-stats">
-							<div class="stat-item text-center">
-								<span class="stat-number text-lg md:text-xl font-bold text-[var(--primary)]">{moments.length}</span>
-								<span class="stat-label text-xs md:text-sm text-75">{i18n(I18nKey.diaryCount)}</span>
-							</div>
-						</div>
-					</div>
-				</div>
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-4 py-4 md:px-6 md:py-5 relative w-full">
+            <div class="relative max-w-4xl mx-auto">
+                <!-- 页面头部区域 -->
+                <div class="moments-header mb-6">
+                    <div class="header-content">
+                        <div class="header-info">
+                            <!-- 标题 -->
+                            <h1 class="moments-title text-xl md:text-2xl font-bold text-90 mb-1">{i18n(I18nKey.diary)}</h1>
+                            <!-- 副标题 -->
+                            <p class="moments-subtitle text-sm md:text-base text-75">{i18n(I18nKey.diarySubtitle)}</p>
+                        </div>
+                        <div class="header-stats">
+                            <!-- 短文统计信息 -->
+                            <div class="stat-item text-center">
+                                <span class="stat-number text-lg md:text-xl font-bold text-[var(--primary)]">{moments.length}</span>
+                                <span class="stat-label text-xs md:text-sm text-75">{i18n(I18nKey.diaryCount)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-				<!-- 短文列表 -->
-				<div class="moments-timeline">
-					<div class="timeline-list space-y-4">
-						{moments.map(moment => (
-							<div class="moment-item card-base p-4 md:p-5 hover:shadow-lg transition-all" key={moment.id}>
-								<div class="moment-content">
-									<p class="moment-text text-sm md:text-base text-90 leading-relaxed mb-3">{moment.content}</p>
-									
-									{moment.images && moment.images.length > 0 && (
-				<div class="moment-images grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
-					{moment.images.map((image, index) => (
-						<div class="image-item relative rounded-md overflow-hidden aspect-square cursor-pointer hover:scale-105 transition-transform" key={index}>
-							<ImageWrapper 
-								src={image} 
-								alt={i18n(I18nKey.diaryImage)}
-								class="w-full h-full object-cover"
-							/>
-						</div>
-					))}
-				</div>
-			)}
-								</div>
-								
-								<hr class="moment-divider border-t border-[var(--line-divider)] my-3" />
-								
-								<div class="moment-footer flex justify-between items-center">
-									<div class="moment-time flex items-center gap-1.5 text-75 text-xs md:text-sm">
-										<i class="time-icon text-xs">🕐</i>
-										<time datetime={moment.date}>
-											{formatTime(moment.date)}
-										</time>
-									</div>
-									<div class="moment-actions">
-										<button class="action-btn reply-btn p-1.5 md:p-2 rounded-md hover:bg-[var(--btn-regular-bg)] transition-colors" title={i18n(I18nKey.diaryReply)}>
-											<i class="reply-icon text-xs md:text-sm">💬</i>
-										</button>
-									</div>
-								</div>
-							</div>
-						))}
-					</div>
-				</div>
+                <!-- 短文列表区域 -->
+                <div class="moments-timeline">
+                    <div class="timeline-list space-y-4">
+                        {/* 遍历所有短文，渲染每一条 */}
+                        {moments.map(moment => (
+                            <div class="moment-item card-base p-4 md:p-5 hover:shadow-lg transition-all" key={moment.id}>
+                                <div class="moment-content">
+                                    {/* 短文文本内容 */}
+                                    <p class="moment-text text-sm md:text-base text-90 leading-relaxed mb-3">{moment.content}</p>
+                                    
+                                    {/* 图片展示区，支持多张图片 */}
+                                    {moment.images && moment.images.length > 0 && (
+                <div class="moment-images grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">
+                    {/* 遍历图片数组，渲染每张图片 */}
+                    {moment.images.map((image, index) => (
+                        <div class="image-item relative rounded-md overflow-hidden aspect-square cursor-pointer hover:scale-105 transition-transform" key={index}>
+                            <ImageWrapper 
+                                src={image} 
+                                alt={i18n(I18nKey.diaryImage)} // 图片alt文本，便于无障碍
+                                class="w-full h-full object-cover"
+                            />
+                        </div>
+                    ))}
+                </div>
+            )}
+                                </div>
+                                
+                                {/* 分割线 */}
+                                <hr class="moment-divider border-t border-[var(--line-divider)] my-3" />
+                                
+                                {/* 底部信息区，包括时间和操作按钮 */}
+                                <div class="moment-footer flex justify-between items-center">
+                                    <div class="moment-time flex items-center gap-1.5 text-75 text-xs md:text-sm">
+                                        <i class="time-icon text-xs">🕐</i>
+                                        <time datetime={moment.date}>
+                                            {formatTime(moment.date)} {/* 格式化后的时间显示 */}
+                                        </time>
+                                    </div>
+                                    <div class="moment-actions">
+                                        {/* 回复按钮，点击可触发回复功能 */}
+                                        <button class="action-btn reply-btn p-1.5 md:p-2 rounded-md hover:bg-[var(--btn-regular-bg)] transition-colors" title={i18n(I18nKey.diaryReply)}>
+                                            <i class="reply-icon text-xs md:text-sm">💬</i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-				<!-- 底部提示 -->
-				<div class="moments-tips text-center mt-6 text-75 text-xs md:text-sm italic">
-					{i18n(I18nKey.diaryTips)}
-				</div>
-			</div>
-		</div>
-	</div>
+                <!-- 底部提示信息 -->
+                <div class="moments-tips text-center mt-6 text-75 text-xs md:text-sm italic">
+                    {i18n(I18nKey.diaryTips)}
+                </div>
+            </div>
+        </div>
+    </div>
 </MainGridLayout>
 
 <style>
-	.card-base {
-		background: var(--card-bg);
-		border: 1px solid var(--line-divider);
-		transition: all 0.3s ease;
-	}
-	
-	.moments-header {
-		padding: 1rem;
-		border-radius: 8px;
-		background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%);
-		color: white;
-		position: relative;
-		overflow: hidden;
-	}
-	
-	.header-content {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		position: relative;
-		z-index: 1;
-	}
-	
-	.moments-title {
-		color: white;
-		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-	}
-	
-	.moments-subtitle {
-		color: rgba(255, 255, 255, 0.9);
-	}
-	
-	.stat-number {
-		color: white;
-	}
-	
-	.stat-label {
-		color: rgba(255, 255, 255, 0.8);
-	}
-	
-	.image-item img {
-		transition: transform 0.3s ease;
-	}
-	
-	.image-item:hover img {
-		transform: scale(1.05);
-	}
-	
-	.action-btn {
-		background: none;
-		border: none;
-		cursor: pointer;
-		color: var(--text-muted);
-	}
-	
-	.action-btn:hover {
-		color: var(--primary);
-	}
-	
-	/* 响应式设计 */
-	@media (max-width: 640px) {
-		.moments-header {
-			padding: 0.75rem;
-		}
-		
-		.header-content {
-			flex-direction: column;
-			text-align: center;
-			gap: 0.75rem;
-		}
-		
-		.moment-images {
-			grid-template-columns: repeat(2, 1fr);
-		}
-		
-		.moment-footer {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.5rem;
-		}
-	}
-	
-	@media (min-width: 641px) and (max-width: 768px) {
-		.moments-header {
-			padding: 1rem;
-		}
-		
-		.moment-images {
-			grid-template-columns: repeat(3, 1fr);
-		}
-	}
-	
-	@media (min-width: 769px) {
-		.moments-header {
-			padding: 1.25rem;
-		}
-		
-		.moment-images {
-			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-			max-width: 450px;
-		}
-	}
-	
-	/* 优化小屏幕显示 */
-	@media (max-width: 480px) {
-		.card-base {
-			margin: 0 -0.5rem;
-		}
-		
-		.moment-item {
-			border-radius: 8px;
-		}
-		
-		.moments-header {
-			border-radius: 6px;
-		}
-	}
+    /* 卡片基础样式 */
+    .card-base {
+        background: var(--card-bg);
+        border: 1px solid var(--line-divider);
+        transition: all 0.3s ease;
+    }
+    
+    /* 页面头部样式，渐变背景 */
+    .moments-header {
+        padding: 1rem;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, var(--primary)) 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* 头部内容布局 */
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* 标题样式 */
+    .moments-title {
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* 副标题样式 */
+    .moments-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* 统计数字样式 */
+    .stat-number {
+        color: white;
+    }
+    
+    /* 统计标签样式 */
+    .stat-label {
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    /* 图片悬停放大效果 */
+    .image-item img {
+        transition: transform 0.3s ease;
+    }
+    
+    .image-item:hover img {
+        transform: scale(1.05);
+    }
+    
+    /* 操作按钮基础样式 */
+    .action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+    }
+    
+    /* 操作按钮悬停高亮 */
+    .action-btn:hover {
+        color: var(--primary);
+    }
+    
+    /* 响应式设计：小屏幕适配 */
+    @media (max-width: 640px) {
+        .moments-header {
+            padding: 0.75rem;
+        }
+        
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.75rem;
+        }
+        
+        .moment-images {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .moment-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+    
+    /* 响应式设计：中等屏幕适配 */
+    @media (min-width: 641px) and (max-width: 768px) {
+        .moments-header {
+            padding: 1rem;
+        }
+        
+        .moment-images {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    /* 响应式设计：大屏幕适配 */
+    @media (min-width: 769px) {
+        .moments-header {
+            padding: 1.25rem;
+        }
+        
+        .moment-images {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            max-width: 450px;
+        }
+    }
+    
+    /* 优化小屏幕显示 */
+    @media (max-width: 480px) {
+        .card-base {
+            margin: 0 -0.5rem;
+        }
+        
+        .moment-item {
+            border-radius: 8px;
+        }
+        
+        .moments-header {
+            border-radius: 6px;
+        }
+    }
 </style>
 
 <script>
-	// 回复按钮功能
-	document.addEventListener('DOMContentLoaded', function() {
-		const replyBtns = document.querySelectorAll('.reply-btn');
-		replyBtns.forEach(btn => {
-			btn.addEventListener('click', function() {
-				// 这里可以添加回复功能
-				console.log('回复功能待实现');
-			});
-		});
-	});
+    // 回复按钮功能，页面加载后为所有回复按钮绑定点击事件
+    document.addEventListener('DOMContentLoaded', function() {
+        const replyBtns = document.querySelectorAll('.reply-btn');
+        replyBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 这里可以添加回复功能，目前仅输出日志
+                console.log('回复功能待实现');
+            });
+        });
+    });
 </script>
