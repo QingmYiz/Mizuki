@@ -1,53 +1,75 @@
 ---
-
+// 导入 Astro 内容相关方法
 import { getEntry, render } from "astro:content";
+// 导入自定义 Markdown 组件
 import Markdown from "@components/misc/Markdown.astro";
+// 导入国际化 key
 import I18nKey from "../i18n/i18nKey";
+// 导入国际化翻译方法
 import { i18n } from "../i18n/translation";
+// 导入主网格布局组件
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
+// 获取名为 "friends" 的内容条目
 const friendsPost = await getEntry("spec", "friends");
 
+// 如果没有找到内容则抛出错误
 if (!friendsPost) {
-	throw new Error("friends page content not found");
+    throw new Error("friends page content not found");
 }
 
+// 渲染内容，获取 Content 组件
 const { Content } = await render(friendsPost);
+
+// 定义友情链接列表，每个对象包含标题、头像、描述、网址和标签
 const items = [
-	{
-		title: "Astro",
-		imgurl: "https://avatars.githubusercontent.com/u/44914786?s=48&v=4",
-		desc: "The web framework for content-driven websites. ⭐️ Star to support our work!",
-		siteurl: "https://github.com/withastro/astro",
-		tags: ["Framework"],
-	},
+    {
+        title: "Astro", // 站点名称
+        imgurl: "https://avatars.githubusercontent.com/u/44914786?s=48&v=4", // 头像地址
+        desc: "The web framework for content-driven websites. ⭐️ Star to support our work!", // 站点描述
+        siteurl: "https://github.com/withastro/astro", // 站点链接
+        tags: ["Framework"], // 标签
+    },
 ];
 
+// 数组乱序函数，用于随机排列友情链接
 function shuffleArray(array) {
-	const newArray = [...array];
-	for (let i = newArray.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-	}
-	return newArray;
+    const newArray = [...array]; // 复制数组
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1)); // 随机索引
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // 交换元素
+    }
+    return newArray; // 返回乱序后的数组
 }
 
+// 获取乱序后的友情链接列表
 const shuffledItems = shuffleArray(items);
 ---
+{/* 使用主网格布局组件包裹页面内容 */}
 <MainGridLayout title={i18n(I18nKey.friends)} description={i18n(I18nKey.friends)}>
+    {/* 外层容器，设置样式和布局 */}
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        {/* 卡片基础样式，内容区域 */}
         <div class="card-base z-10 px-9 py-6 relative w-full ">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8 my-4">
+            {/* 友情链接列表，响应式网格布局 */}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8 my-4">
+                {/* 遍历乱序后的友情链接数组，渲染每个卡片 */}
                 {shuffledItems.map((item) => (
                     <div class="flex flex-nowrap items-stretch h-28 gap-4 rounded-[var(--radius-large)]">
+                        {/* 站点头像区域 */}
                         <div class="w-28 h-28 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-900">
                             <img src={item.imgurl} alt="站点头像" class="w-full h-full object-cover">
                         </div>
+                        {/* 站点信息区域 */}
                         <div class="grow w-full">
+                            {/* 站点标题 */}
                             <div class="font-bold transition text-lg text-neutral-900 dark:text-neutral-100 mb-1">{item.title}</div>
+                            {/* 站点描述 */}
                             <div class="text-50 text-sm font-medium">{item.desc}</div>
+                            {/* 标签区域，支持多个标签显示 */}
                             <div class:list={["items-center", {"flex": true, "hidden md:flex" : false}]}>
                                 <div class="flex flex-row flex-nowrap items-center">
+                                    {/* 遍历标签，显示分隔符和标签内容 */}
                                     {(item.tags && item.tags.length > 0) && item.tags.map((tag,i) => (
                                     <div class:list={[{"hidden": i==0}, "mx-1.5 text-[var(--meta-divider)] text-sm" ]}>
                                         /
@@ -55,11 +77,14 @@ const shuffledItems = shuffleArray(items);
                                     <span class="transition text-50 text-sm font-medium">
                                         {tag}
                                     </span>))}
+                                    {/* 如果没有标签则显示“无标签” */}
                                     {!(item.tags && item.tags.length > 0) && <div class="transition text-50 text-sm font-medium">{i18n(I18nKey.noTags)}</div>}
                                 </div>
                             </div>
                         </div>
-                        <a href={item.siteurl} target="_blank" rel="noopener noreferrer"class="flex btn-regular w-[3.25rem] rounded-lg bg-[var(--enter-btn-bg)] hover:bg-[var(--enter-btn-bg-hover)] active:bg-[var(--enter-btn-bg-active)] active:scale-95">
+                        {/* 跳转按钮，点击后打开站点 */}
+                        <a href={item.siteurl} target="_blank" rel="noopener noreferrer" class="flex btn-regular w-[3.25rem] rounded-lg bg-[var(--enter-btn-bg)] hover:bg-[var(--enter-btn-bg-hover)] active:bg-[var(--enter-btn-bg-active)] active:scale-95">
+                            {/* 箭头图标 */}
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="transition text-[var(--primary)] text-4xl mx-auto iconify iconify--material-symbols" width="1em" height="1em" viewBox="0 0 24 24">
                                 <path fill="currentColor" d="M12.6 12L8.7 8.1q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.6 4.6q.15.15.213.325t.062.375t-.062.375t-.213.325l-4.6 4.6q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7z"></path>
                             </svg>
@@ -67,6 +92,7 @@ const shuffledItems = shuffleArray(items);
                     </div>
                 ))}
             </div>
+            {/* Markdown 内容区域，显示 friends 内容 */}
             <Markdown class="mt-2">
                 <Content />
             </Markdown>
